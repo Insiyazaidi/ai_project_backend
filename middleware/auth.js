@@ -9,9 +9,43 @@ if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
   // verify token 
   const decode = jwt.verify(token , process.env.JWT_SECRET);
   req.user= await user.findById(decode.id).select("-password")
+  if(!req.user){
+    return res.status(400).json({
+      success: false,
+      error:"user not found",
+      statuscode: 401
+    })
+  }
+  next();
     }
     catch(error){
+  console.log('Auth middleware error' , error.message)
+if(error.name==="TokenExpiredError"){
+    return res.status(401).json({
+    success:false ,
+    error:'Token has expired',
+    statuscode:401
+  })
+}
+return res.status(401).json({
+  success:false,
+  error:"Not authorized , token failed" ,
+  statuscode:401
+})
 
     }
+
+} 
+
+// if  req.headers.authorization.startsWith("Bearer") works the try catch will execute other wise (!token ) part will ... 
+if(!token){
+  return res.status(401).json({
+  success:false,
+  error:"Not authorized , no token" ,
+  statuscode:401
+  })
 }
 }
+export default protect
+
+
