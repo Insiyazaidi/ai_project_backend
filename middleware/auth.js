@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import user from "../models/user.js"
 
-const protect = async(req , res , next)=>{  // git hub
+const protect = async(req , res , next)=>{  // checking whteher working 
 let token 
 if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
     try{
