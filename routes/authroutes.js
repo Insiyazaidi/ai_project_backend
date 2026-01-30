@@ -5,8 +5,8 @@ import protect from "../middleware/auth.js"
 const router = express.Router();
 // validation middleware
 const registervalidation = [
-    body("username").trim.isLength({min:3}).withMessage("username must be atleast 3 characters"),
-    body("email").normalizeEmail().withMessage("Please provide a valid email"),
+    body("username").trim().isLength({min:3}).withMessage("username must be atleast 3 characters"),
+    body("email").isEmail().withMessage("Please provide a valid email").normalizeEmail(),
     body("password").isLength({min:6}).withMessage("Password must be at least 6 characters")
 
 ];

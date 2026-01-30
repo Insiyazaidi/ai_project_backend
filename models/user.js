@@ -14,7 +14,7 @@ const userschema = new mongoose.Schema({
     required:[true , "Please provide an email"],
     unique: true,
     lowercase:true,
-    match:[/^S+@\S+\.\S+$/ , "Please provide a valid email"]
+    match:[/^\S+@\S+\.\S+$/, "Please provide a valid email"]
 
    }  ,
    password:{
@@ -27,9 +27,9 @@ const userschema = new mongoose.Schema({
       type:String,
       default:null
    } , 
- timestamps:true
 
-})
+
+} , {timestamps:true})
 // hashing password before saving 
 userschema.pre("save" , async function (next) {  // save hone se phle yeh run hoga 
    if(!this.isModified("password")){    // agr password modify nhi hua .. toh next call hoga  , this points to current user 

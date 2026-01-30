@@ -20,7 +20,7 @@ export const register = async(req,res , next)=>{  // frontend se  username , ema
  }
 
  // if user doesnt exsit then create 
- const user =  await user.create({username , email , password})
+ const newuser =  await user.create({username , email , password})
 // generating token 
 
 const token = generatingtoken(user._id)
@@ -28,11 +28,11 @@ res.status(201).json({
     success:true,
     data:{
         user:{
-            id:user._id,
-            username:user.username,
-            email:user.email,
-            profileimage: user.profileimage,
-            createdat:user.createdAt   // chance of errorrrrrrrr *****
+            id:newuser._id,
+            username:newuser.username,
+            email:newuser.email,
+            profileimage: newuser.profileimage,
+            createdat:newuser.createdAt   // chance of errorrrrrrrr *****
             }, 
             token , 
             
