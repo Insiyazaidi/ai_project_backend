@@ -90,7 +90,7 @@ res.status(200).json({success:true , data:{ id: profileuser._id , username:profi
 }
 
 
-export const updateprofile = async(req,res , next)=>{
+export const updateprofile = async(req,res)=>{
     try{
  const {username , email , profileimage} = req.body
  const  updateprouser = await user.findById(req.user._id)
@@ -107,7 +107,8 @@ return res.status(200).json({success:true , data:{id:updateprouser._id , usernam
  }
 
     catch(error){
-   next(error);
+   console.log(error)
+      return res.status(500).json({ message: "Server error" })
     }
 
 }
