@@ -7,8 +7,8 @@ if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
     try{
   token  = req.headers.authorization.split(' ')[1];
   // verify token 
-  const decode = jwt.verify(token , process.env.JWT_SECRET);
-  req.user= await user.findById(decode.id).select("-password")
+  const decode = jwt.verify(token , process.env.JWT_SECRET);  // decode will contain pay load ... {id + timestamps  }
+  req.user= await user.findById(decode.id).select("-password")  //   yha pr req.user m full user object 
   if(!req.user){
     return res.status(400).json({
       success: false,

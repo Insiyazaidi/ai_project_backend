@@ -48,7 +48,7 @@ res.status(201).json({
 }
 export const login = async(req,res , next)=>{
     try{
-const{email , password}=req.body();
+const{email , password}=req.body;
 if(!email|| !password){
     return res.status(400).json({success:false , error:"Please provide email and password" , statuscode:400})
 }
@@ -58,39 +58,82 @@ if(!checkinguser){
     return res.status(401).json({success:false , error:"Invalid Credentials" , statuscode:401})
 }
 
-const ismatch = await user.matchpassword(password);
+const ismatch = await checkinguser.matchpassword(password);   // calling the function  which we included using user.model 
 if(!ismatch){
     return res.status(401).json({success:false , error:"Invalid credential" , statuscode:401})
 }
 
+
 // generate token 
-const token = generatingtoken(user._id)
-res.status(200).json({success:true, loggedinuser:{id:checkinguser._id ,username:checkinguser.username , email:checkinguser.email, profileimage:user.profileimage } ,
+const token = generatingtoken(checkinguser._id)
+res.status(200).json({success:true, loggedinuser:{id:checkinguser._id ,username:checkinguser.username , email:checkinguser.email, profileimage:checkinguser.profileimage } ,
 token , message:"Login sucessfull"})
     }
     catch(error){
    next(error);
     }
 }
+
+
 export const getprofile = async(req,res , next)=>{
     try{
+const profileuser = await user.findById(req.user._id); // req.user contain full userdata .. because we wrote that in protect middleware
+res.status(200).json({success:true , data:{ id: profileuser._id , username:profileuser.username , email:profileuser.email , profileimage:profileuser.profileimage
+    , createdat : profileuser.createdAt , updateat:profileuser.updatedAt
+}})
+
 
     }
     catch(error){
    next(error);
     }
 }
+
+
 export const updateprofile = async(req,res , next)=>{
     try{
+ const {username , email , profileimage} = req.body
+ const  updateprouser = await user.findById(req.user._id)
+ if(username) updateprouser.username= username // db se jo username aaya h aur jo req.body se aaya h vo same h ?
+ if(email) updateprouser.email = email
+if(profileimage) updateprouser.profileimage=profileimage
 
-    }
+await updateprouser.save();
+return res.status(200).json({success:true , data:{id:updateprouser._id , username:updateprouser.username , email:updateprouser.email,
+    profileimage:updateprouser.profileimage
+} , message:"Profile updated successfully"})
+
+
+ }
+
     catch(error){
    next(error);
     }
+
 }
+
 
 export const changepassword = async(req,res , next)=>{
     try{
+
+ const {currentpass , newpass} = req.body
+  if(!currentpass || !newpass){
+    return res.status(400).json({success:false , error:"Please provide curr and new password" , statuscode: 400})
+  }
+const changeuser = await user.findById(req.user._id).select("+password")
+const ismatch = await changeuser.matchpassword(currentpass)
+// matching the password ..
+if(!ismatch){
+    return res.status(401).json({
+    success:false , error:"current password is incorrect",
+    statuscode:401
+})
+
+}
+// updating the password 
+changeuser.password = newpass;
+await changeuser.save()
+ res.status(200).json({success:true , message:"Password changed successfully"})
 
     }
     catch(error){

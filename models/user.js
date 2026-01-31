@@ -40,12 +40,13 @@ const salt = await bcrypt.genSalt(10)
 this.password = await bcrypt.hash(this.password , salt)
 })
 // compare password method
-userschema.methods.matchPassword=async function(enteredPassword){
+userschema.methods.matchpassword=async function(enteredPassword){
    return bcrypt.compare(enteredPassword , this.password)
 }
 
 const user = mongoose.model("user" , userschema)
 export default user;
+
 
 
 
