@@ -48,7 +48,25 @@ res.status(201).json({
 }
 export const login = async(req,res , next)=>{
     try{
+const{email , password}=req.body();
+if(!email|| !password){
+    return res.status(400).json({success:false , error:"Please provide email and password" , statuscode:400})
+}
 
+const checkinguser =  await user.findOne({email}).select("+password"); 
+if(!checkinguser){
+    return res.status(401).json({success:false , error:"Invalid Credentials" , statuscode:401})
+}
+
+const ismatch = await user.matchpassword(password);
+if(!ismatch){
+    return res.status(401).json({success:false , error:"Invalid credential" , statuscode:401})
+}
+
+// generate token 
+const token = generatingtoken(user._id)
+res.status(200).json({success:true, loggedinuser:{id:checkinguser._id ,username:checkinguser.username , email:checkinguser.email, profileimage:user.profileimage } ,
+token , message:"Login sucessfull"})
     }
     catch(error){
    next(error);

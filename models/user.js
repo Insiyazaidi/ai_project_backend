@@ -23,7 +23,7 @@ const userschema = new mongoose.Schema({
   minlength:[6 , "Password msut be at least 6 characters long"],
   select:false
    } ,
-   profileImage:{
+   profileimage:{
       type:String,
       default:null
    } , 
