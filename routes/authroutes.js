@@ -22,5 +22,5 @@ const loginvalidation = [
 
  router.get("/profile" , protect , getprofile)
  router.put("/profile" , protect, updateprofile)
- router.post("/change-password" , protect , changepassword)  // protect is left to define
+ router.post("/change-password" , protect , changepassword)  
  export default router 
