@@ -5,7 +5,8 @@ import cors from "cors"
 import path from "path"
 import { fileURLToPath } from "url";
 import connectdb from "./config/db.js"
-import router from "./routes/authroutes.js";
+import authroute from "./routes/authroutes.js";
+import documentroute from "./routes/documentroutes.js";
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const app = express();
@@ -24,8 +25,8 @@ app.use(
 )
 
 app.use(express.json());  // to make use of json in future 
- app.use("/api/user" , router);
-
+ app.use("/api/user" , authroute);
+app.use("/api/documents" , documentroute);
 
 app.use(express.urlencoded({extended:true})) // to read data from html form 
 //static folder for uploads
