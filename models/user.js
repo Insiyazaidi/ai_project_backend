@@ -31,9 +31,9 @@ const userschema = new mongoose.Schema({
 
 } , {timestamps:true})
 // hashing password before saving 
-userschema.pre("save" , async function (next) {  // save hone se phle yeh run hoga 
+userschema.pre("save" , async function () {  // save hone se phle yeh run hoga 
    if(!this.isModified("password")){    // agr password modify nhi hua .. toh next call hoga  , this points to current user 
- return  next();  // yeh mongoose se hi aaya h function hme isko define krne ki zaroorat nhi h  , yha se return krdia next function taaki neeche 
+   return;  // yeh mongoose se hi aaya h function hme isko define krne ki zaroorat nhi h  , yha se return krdia next function taaki neeche 
  // yeh neeche password ki hasing na ho phir se agr password chnage nhi hua h .. 
    } 
 const salt = await bcrypt.genSalt(10)
