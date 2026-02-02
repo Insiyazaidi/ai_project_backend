@@ -8,10 +8,12 @@ export const chunktext = (text , chunksize=500 , overlap=50)=>{
 
  
 
-    const chunks =[]
-    let currentchunk = []
-    let currentwordcount =0;
-    let chunkindex = 0;    // [ "   Hello   world   from   AI   " , " hello insiya zaidi" ] - paragraphs 
+    const chunks =[]  // final output 
+    let currentchunk = [] // Abhi jo chunk bana rahe ho
+    let currentwordcount =0;   // us chunk m total kitne words h 
+    let chunkindex = 0;  // har chunk a number 
+ 
+   // [ "   Hello   world   from   AI   " , " hello insiya zaidi" ] - paragraphs 
 //   "   Hello   world   from   AI   "  - paragraph ,,, .trim will remove front and back space .split will remove in btw spaces and 
 // convert each word of paragraph into elements of array .. ["Hello", "world", "from", "AI"]
 
@@ -30,6 +32,7 @@ if(paragraphwordcount>chunksize){ // 600>500
     }
     currentchunk=[];
     currentwordcount =0;
+    
 }
 
 // split large paragraph into word based chunks                 // total word = 1000 , chunksize = 300 , overlap = 50 
@@ -79,11 +82,6 @@ else {
 
 }
 
-
-
-
-
-
 // add last chunk 
 if(currentchunk.length>0){
      chunks.push({
@@ -117,4 +115,75 @@ if(chunks.length ===0 && cleanedtext.length>0){ // in case koi chunk bna hi nhi 
 }
    return chunks
 }
+
+// find relevant chunks based on keyboard matching 
+export const findrelevantchunks =(chunks , query , maxchunks=3)=>{
+    if(!chunks || chunks.length===0 || !query){
+        return []
+    }
+    // common stop words to be excluded 
+    const stopwords = new Set([  // set is used for fast searching ..  
+        'the' , 'is' , 'at' ,'which' , 'on' , 'a' , 'an' , 'and','or','but' , 'in','with','to','for','of','as','by','this','it'
+    ])
+    // extract and clean query words 
+    const querywords = query.toLowerCase().split(/\s+/).filter(w=>w.length>2 && !stopwords.has(w)) // w=query m jo word ka size>2 ho aur vo stop word m nhi h 
+    // sirf unko rkho baaki sb remove ..
+    if(querywords.length===0){   // is query m kuch meaningful nhi hua toh - 
+        // return clean chunk objects without mongoose metadata 
+        return chunks.slice(0,maxchunks).map(chunk=>({  // maxchunk 3 hai toh array ke index 0-2 tk ki cheeze return hojaigi 
+            content:chunk.content,
+            chunkindex : chunk.chunkindex,
+            pagenumber: chunk.pagenumber,
+            _id:chunk._id
+        }))
+    }
+ 
+const scorechunks = chunks.map((chunk , index)=>{
+    const content = chunk.content.toLowerCase()
+    const contentwords = content.split(/\s+/).length
+    let score = 0;
+    // score each query word 
+    for(const word of querywords){
+// extract word match (higher score)
+const exactmatches =(content.match(new RegExp(`\\b${word}\\b`,'g'))|| []).length
+score+= exactmatches*3  // agr chunk m query ka exact word mil gya toh * 3 krna h 
+// partial match
+const partialmatches = (content.match(new  RegExp(word , 'g'))|| []).length // this will count total match = exact+partial so to get partial match
+// we will subtract  and then * by 1.5 
+score+= Math.max(0, partialmatches-exactmatches)*1.5
+    }
+
+    // bonus multiple query words founfd
+
+const uniquewordsfound = querywords.filter(word=>content.includes(word)) // Query ke kitne alag-alag words chunk me mil rahe hain (chahe ek baar mile ya 100 baar).
+if(uniquewordsfound.length>1){
+    score+= uniquewordsfound.length*2
+}
+const normalizedscore = score/Math.sqrt(contentwords)
+const positionbonus = 1-(index/chunks.length)*0.1 // earlier chunks will give more priority .. index 
+// return clean obj 
+return {
+    content:chunk.content,
+            chunkindex : chunk.chunkindex,
+            pagenumber: chunk.pagenumber,
+            _id:chunk._id,
+            score:normalizedscore*positionbonus,
+            rawscore: score,
+            matchedwords:uniquewordsfound
+}
+})
+return scorechunks.filter(chunk=> chunk.score>0).sort((a,b)=>{
+    if(b.score!==a.score){   // agr score diff h 
+        return b.score-a.score  
+    }
+    if(b.matchedwords!==a.matchedwords){
+        return b.matchedwords-a.matchedwords
+    }
+    return a.chunkindex-b.chunkindex  // if matchedwors and score are same teh jo phle aaya h vo 
+})
+.slice(0, maxchunks) 
+}
+
+
+
 
