@@ -44,23 +44,25 @@ for(let i =0 ; i<paragraphwords.length;i +=(chunksize-overlap)){   //   i = 0,  
     // eg 750+300=1050>=1000 true - break ...  
 }
 
-continue;
+continue;  // is para ka kaam hogya  .. isko chunk krke save krlia .. ab next paragraph pr chle jaooo 
     }
 
 
 
  // if adding this para exceeds chunk size , save current chunk 
-if(currentwordcount+paragraphwordcount>chunksize && currentchunk.length>0 ){
-    chunks.push({
+if(currentwordcount+paragraphwordcount>chunksize && currentchunk.length>0 ){  // currentchunk - 250 h aur paragraphwordcount - 80 , 250+80-310 >300 
+    chunks.push({  // leave the paragraphwordcount -80 kyu  ki limit cross horhi h bs currentchunk ko save krlo ... 
             content:currentchunk.join('\n\n'),
             chunkindex: chunkindex++,
             pagenumber:0
         })
 
+
         // create overlap from previous chunk 
+        
         const prevchunktext = currentchunk.join(' ')
-            const prevword = prevchunktext.split(/\S+/)
-            const overlaptext = prevword.slice(-Math.min(overlap , prevwords.length)).join(' ')
+            const prevwords = prevchunktext.split(/\S+/)
+            const overlaptext = prevwords.slice(-Math.min(overlap , prevwords.length)).join(' ')
             currentchunk = [overlaptext ,paragraph.trim()]
             currentwordcount = overlaptext.split(/\S+/).length+paragraphwordcount
         
