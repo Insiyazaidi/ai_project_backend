@@ -1,5 +1,5 @@
 export const chunktext = (text , chunksize=500 , overlap=50)=>{
-    if(!text || text.trim.length===0){
+    if(!text || text.trim().length===0){
         return []
     }
     const cleanedtext = text.replace(/\r\n/g , '\n').replace(/\s+/g , ' ').replace(/\n /g , '\n').replace(/ \n/g , '\n').trim()
@@ -32,10 +32,9 @@ if(paragraphwordcount>chunksize){ // 600>500
     }
     currentchunk=[];
     currentwordcount =0;
-    
-}
 
-// split large paragraph into word based chunks                 // total word = 1000 , chunksize = 300 , overlap = 50 
+
+    // split large paragraph into word based chunks                 // total word = 1000 , chunksize = 300 , overlap = 50 
 for(let i =0 ; i<paragraphwords.length;i +=(chunksize-overlap)){   //   i = 0,  i = 250 , i = 500 , i = 750 , i= 1000
     const chunkwords = paragraphwords.slice(i , i+chunksize) // 0-249 words , 250-549 , 500-799, 750 - 1050  
     chunks.push({
@@ -44,16 +43,20 @@ for(let i =0 ; i<paragraphwords.length;i +=(chunksize-overlap)){   //   i = 0,  
         pagenumber:0
     })
     if(i+chunksize>= paragraphwords.length) break;  //yha pr bhi check krrha h ki agr size bda hogya toh vps iterate krne ki zaroorat nhi // eg 750+300=1050>=1000 true - break ...  
-    continue;   
+   
  // is para ka kaam hogya  .. isko chunk krke save krlia .. ab next paragraph pr chle jaooo  
 }
+   continue;     
+}
+
+
  
    
  // if adding this para exceeds chunk size , save current chunk 
 
 if(currentwordcount+paragraphwordcount>chunksize && currentchunk.length>0 ){  // currentchunk - 260 h aur paragraphwordcount - 80 , 250+80-310 >300 
     chunks.push({  // leave the paragraphwordcount -80 kyu  ki limit cross horhi h bs currentchunk ko save krlo ... 
-            content:currentchunk.join('\n\n'),
+            content:currentchunk.join(' '),
             chunkindex: chunkindex++,
             pagenumber:0
         })
@@ -68,7 +71,7 @@ if(currentwordcount+paragraphwordcount>chunksize && currentchunk.length>0 ){  //
            // taking eg .slice(50) .. yaani peece se 50 words utha lo ... 
            
             currentchunk = [overlaptext ,paragraph.trim()]  // ab currentchunk start hoga prev 50 words + new 80 words 
-            currentwordcount = overlaptext.split(/\S+/).length+paragraphwordcount // 50+80=130.. this prevtext was taken to ensure overlapping must take place 
+            currentwordcount = overlaptext.split(/\s+/).length+paragraphwordcount // 50+80=130.. this prevtext was taken to ensure overlapping must take place 
         
 }
 
@@ -155,10 +158,11 @@ score+= Math.max(0, partialmatches-exactmatches)*1.5
 
     // bonus multiple query words founfd
 
-const uniquewordsfound = querywords.filter(word=>content.includes(word)) // Query ke kitne alag-alag words chunk me mil rahe hain (chahe ek baar mile ya 100 baar).
+const uniquewordsfound = querywords.filter(word=>content.includes(word)) // (chahe ek baar mile ya 100 baar).
 if(uniquewordsfound.length>1){
     score+= uniquewordsfound.length*2
 }
+
 const normalizedscore = score/Math.sqrt(contentwords)
 const positionbonus = 1-(index/chunks.length)*0.1 // earlier chunks will give more priority .. index 
 // return clean obj 
@@ -172,14 +176,14 @@ return {
             matchedwords:uniquewordsfound
 }
 })
-return scorechunks.filter(chunk=> chunk.score>0).sort((a,b)=>{
-    if(b.score!==a.score){   // agr score diff h 
-        return b.score-a.score  
+return scorechunks.filter(chunk=> chunk.score>0).sort((a,b)=>{ // descending
+    if(b.score!==a.score){   
+        return b.score-a.score   // b>a positive value return hogi yaania bdi vlaue phle  , big-small   
     }
-    if(b.matchedwords!==a.matchedwords){
-        return b.matchedwords-a.matchedwords
+    if(b.matchedwords.length!==a.matchedwords.length){
+        return b.matchedwords.length-a.matchedwords.length
     }
-    return a.chunkindex-b.chunkindex  // if matchedwors and score are same teh jo phle aaya h vo 
+    return a.chunkindex-b.chunkindex  // if matchedword and score are same teh jo phle aaya h vo 
 })
 .slice(0, maxchunks) 
 }
