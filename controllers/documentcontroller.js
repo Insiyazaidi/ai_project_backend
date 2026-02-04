@@ -95,35 +95,48 @@ catch (error) {
 export const getdocuments = async(req, res , next)=>{
 
 try {
- 
-    const documents = await document.aggregate(
+  
+    const documents = await document.aggregate(  // applying aggreagte to model name not collection 
+        // this will update that particular collection temporary not in db 
         {
         $match:{userid: new mongoose.Types.ObjectId(req.user._id)}
     } ,
 {
-    $lookup:{
+    $lookup:{  // always return an array , array name is defined in as :" " , this will be automatically added to document temporary 
         from:"flashcards",
-        localfield:"_id",
-        foreignfield:"documentid",
+        localField:"_id",
+        foreignField:"documentid",
         as:"flashcardsets"
     }
 },
 {
     $lookup:{
         from:"quizzes",
-        localfield:"_id",
-        foreignfield:"documentid",
+        localField:"_id", // documents collection m field hogi id krke 
+        foreignField:"documentid",  // quizzes collection m field hogi document krke 
         as:"quizzes"
         
     }
 },
 {
-    $addfields:{
-        flashcardcount:{$size:"$flashcardsets"},
+    $addfields:{  // add sizes of array flashcardsets , quizzes ... 
+        flashcardcount:{$size:"$flashcardsets"}, // {"$flashcardsets"} $ is used so that mongoose understand this is not string it is field name 
         quizcount:{$size:"$quizzes"}
     }
 },
-{
+{                                                    
+
+  // BEFORE FLASH CARDS ..   
+    //  { _id: 111,
+ // title: "Math Notes",
+ // extractedtext: "Long text data...",
+ // chunks: [...],
+ // flashcardsets: [ {...}, {...} ],
+ // quizzes: [ {...} ],
+ // flashcardcount: 2,
+ // quizcount: 1
+//      }
+
     $project:{
         extractedtext:0,chunks:0,flashcardsets:0,quizzes:0
     }
@@ -146,6 +159,8 @@ res.status(200).json({success:true,count:documents.length , data:documents})
 // get single document with chunks 
 export const getdocument = async(req, res , next)=>{
     try {
+
+
     
 }
  catch (error) {
@@ -159,6 +174,8 @@ export const getdocument = async(req, res , next)=>{
 export const deletedocument = async(req, res , next)=>{
  try {
     
+
+
 }
  catch (error) {
    
@@ -171,6 +188,7 @@ export const deletedocument = async(req, res , next)=>{
 export const updatedocument = async(req, res , next)=>{
     try {
     
+        
 }
  catch (error) {
    
