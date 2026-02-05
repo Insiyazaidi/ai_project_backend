@@ -21,3 +21,21 @@ const storage = multer.diskStorage({
         cb(null , `${uniquesuffix}-${file.originalname}`)   // final filename will be combination 
     }
 })
+
+// file filter - only pdf 
+const filefilter = (req,file,cb)=>{
+    if(file.mimetype==="Application/pdf"  ){
+        cb(null , true)
+    }
+    else{
+        cb(new Error("Only pdf files are allowed"), false)
+    }
+}
+const upload = multer({
+    storage:storage,
+    fileFilter:filefilter,
+    limits:{
+        fileSize: parseInt(process.env.MAX_FILE_SIZE)|| 10485760
+    }
+})
+export default upload
