@@ -17,8 +17,8 @@ const storage = multer.diskStorage({
     },
     filename:(req, file,cb)=>{
         const uniquesuffix = Date.now()+'-'+Math.round(Math.random()*1E9) //Date.now- current time in millisec , math.random generate random 
-        // number btw 0-1 multily that no, round of krdo  that  will be unique suffix 
-        cb(null , `${uniquesuffix}-${file.originalname}`)   // final filename will be combination 
+      const cleanName = file.originalname.replace(/\s+/g, "-")                         // number btw 0-1 multily that no, round of krdo  that  will be unique suffix 
+        cb(null , `${uniquesuffix}-${cleanName}`)   // final filename will be combination 
     }
 })
 

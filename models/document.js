@@ -11,6 +11,7 @@ const documentschema = new mongoose.Schema({
         trim:true
     },
     filename:{type:String , required:true},
+    filepath:{type:String ,required:true },
 
     filesize:{type:Number, required:true},
     extractedtext:{type:String , default:""},
@@ -20,7 +21,7 @@ const documentschema = new mongoose.Schema({
             required:true
         } ,
         pagenumber:{
-            title:Number,
+            type:Number,
             default:0
         },
         chunkindex:{
@@ -29,13 +30,26 @@ const documentschema = new mongoose.Schema({
         lastaccessed:{
          type:Date,
          default:Date.now
-        },
-        status:{
+        }
+      
+    }] ,
+        uploaddate:{
+        type: Date,
+        default: Date.now,
+        immutable: true  
+    },
+
+  lastaccessed:{
+        type:Date,
+        default:Date.now
+    },
+
+      status:{
             type:String,
             enum:["processing" , "ready" , "failed"],
             default:"processing"
         }
-    }]
+
 } , {timestamps:true})
 
 documentschema.index({userid:1 , documentid:1})

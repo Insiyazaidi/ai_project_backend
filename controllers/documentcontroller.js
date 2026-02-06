@@ -5,7 +5,7 @@ import mongoose from "mongoose"
 import {extracttextrfrompdf} from "../utilis/pdfparser.js"
 import {chunktext} from "../utilis/textchunker.js"
 import fs from "fs/promises"
-import document from "../models/document.js";
+
 
 export const uploaddocument = async(req , res , next)=>{
 try {
@@ -29,26 +29,26 @@ return res.status(400).json({
 }
 
 // construct the base url for the uploaded file
-const baseurl = `https://localhost:${process.env.PORT|| 8000}`
+const baseurl = `http://localhost:${process.env.PORT|| 8000}`
 const fileurl = `${baseurl}/uploads/documents/${req.file.filename}`
+console.log(fileurl)
 
 // create document record
-const document = await document.create({   // storing in database 
+const documents = await document.create({   // storing in database 
     userid:req.user._id, // req.user is an object coming from protect middleware 
     title,
-    filename: req.file.originalname,
+    filename: req.file.filename,
     filesize:req.file.size,
     filepath :fileurl,
     status:"processing"
 })
-
- 
-processpdf(document._id , req.file.path).catch(err=>{
+processpdf(documents._id , req.file.path).catch(err=>{
     console.log("pdf  processing error", err)
-})
+})  
+
 res.status(201).json({
     success:true,
-    data:document,
+    data:documents,
     message:"Document uploaded successfully. Processing in progress..."
 })
 
@@ -62,11 +62,7 @@ catch (error) {
     next(error);  // pass an error to Express's error-handling middleware
 }
 
-
-
 }
-
-
 
  const processpdf= async(documentid , filepath)=>{
     try{
@@ -81,22 +77,19 @@ catch (error) {
         })
         console.log(`document ${documentid} processed successfully`)
     }
+
     catch(error){
- console.error(`Error processing document${documentid}`,error)
+ console.error(`Error processing document ${documentid}`,error)
  await document.findByIdAndUpdate(documentid,{status:"failed"})
-    }
- }
+    } 
 
-
-
-
-
+}
 // to get all documents of user 
 export const getdocuments = async(req, res , next)=>{
 
 try {
   
-    const documents = await document.aggregate(  // applying aggreagte to model name not collection 
+    const documents = await document.aggregate( [ // applying aggreagte to model name not collection 
         // this will update that particular collection temporary not in db 
         {
         $match:{userid: new mongoose.Types.ObjectId(req.user._id)}
@@ -119,7 +112,7 @@ try {
     }
 },
 {
-    $addfields:{  // add sizes of array flashcardsets , quizzes ... 
+    $addFields:{  // add sizes of array flashcardsets , quizzes ... 
         flashcardcount:{$size:"$flashcardsets"}, // {"$flashcardsets"} $ is used so that mongoose understand this is not string it is field name 
         quizcount:{$size:"$quizzes"}
     }
@@ -145,7 +138,7 @@ try {
     $sort:{uploaddate:-1}
 }
 
-)
+])
 res.status(200).json({success:true,count:documents.length , data:documents})
 }
  catch (error) {
@@ -171,6 +164,8 @@ export const getdocument = async(req, res , next)=>{
 
 
 }
+
+
 export const deletedocument = async(req, res , next)=>{
  try {
     
@@ -185,6 +180,8 @@ export const deletedocument = async(req, res , next)=>{
     
 
 }
+
+
 export const updatedocument = async(req, res , next)=>{
     try {
     
