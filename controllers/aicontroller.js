@@ -3,7 +3,7 @@ import document from "../models/document.js";
 import quiz from "../models/quiz.js";
 import chathistory from "../models/chathistory.js"
 import * as geminiservice from "../utilis/geminiservice.js"
-import { findrelevantchunks } from "../utilis/textchunker";
+import { findrelevantchunks } from "../utilis/textchunker.js";
 
 export const generateflashcards = async(req , res, next)=>{
     try{

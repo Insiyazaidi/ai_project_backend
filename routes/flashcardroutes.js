@@ -10,3 +10,5 @@ flashroute.get("/:documentid" , getflashcards)
 flashroute.post("/:cardid/review" , reviewflashcard)
 flashroute.put("/:cardid/star" , togglestarflashcard)
 flashroute.delete("/:id" , deleteflashcardset)
+
+export default flashroute
