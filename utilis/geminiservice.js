@@ -15,7 +15,7 @@ seperate each flashcard with "---"
 
 text: ${text.substring(0 , 15000)}`
 try{
-const response  = ai.models.generateContent({ // models -  ek property hai jo available AI models ko access karne deti hai 
+const response  = await ai.models.generateContent({ // models -  ek property hai jo available AI models ko access karne deti hai 
     // generateContent - ek model h jo content deti h 
     model:"gemini-2.5-flash-lite",
     contents: prompt
@@ -46,7 +46,7 @@ for(const card of cards){    // now we process one card ...
         }
 
 }
-return flashcards.slice(0, count)  // icase zaya hue toh remove krdena extra 
+return flashcards.slice(0, count)  // icase zaya hue toh remove krdena extra  .. it will return an array finally 
 
 }
 
@@ -57,4 +57,62 @@ catch(error){
 
  }
 
- 
+ export const generatesummary = async(text)=>{
+    const prompt = `Provide a concise summary of the following text  , highlighting the key concepts , main idea and important points keep the 
+    summary clear and structure
+    text: ${text.substring(0 , 20000)}`
+    try{
+const response = await ai.models.generateContent({
+       model:"gemini-2.5-flash-lite",
+    contents: prompt
+})
+const generatedtext = response.text
+return generatedtext
+
+    }
+    catch(error){
+            console.log("Gemini API error", error)
+    throw new Error("Failed to generate flashcards")
+    }
+ }
+ export const chatWithcontext = async(question , chunks)=>{  // chunks is an object .. jiske ek property h content .. textchunker.js m dekho
+const context = chunks.map((c,i)=>`[chunk ${i+1}\n ${c.content}]`).join("\n\n") // structuring the data coming from chunks
+// chunk 1 content ... , chunk 2 content ... 
+const prompt = `Based on the following context from a document , Analyse the context and answer the user's question if the answer is 
+not in the context , say no 
+context:${context}
+question:${question}
+answer`
+try{
+   const response = await ai.models.generateContent({
+       model:"gemini-2.5-flash-lite",
+    contents: prompt
+}) 
+const generatedtext = response.text
+return generatedtext
+}
+
+   catch(error){
+            console.log("Gemini API error", error)
+    throw new Error("Failed to process chat request")
+    }
+ }
+
+export const explainconcept = async(concept , context)=>{
+const prompt = `Explain the concept of ${concept} based on the following context .provide a clear educational explanation that easy to understand
+include examples if relevant
+context:${context.substring(0, 10000)}`
+try{
+   const response = await ai.models.generateContent({
+       model:"gemini-2.5-flash-lite",
+    contents: prompt
+}) 
+const generatedtext = response.text
+return generatedtext
+}
+
+   catch(error){
+            console.log("Gemini API error", error)
+    throw new Error("Failed to process chat request")
+    }
+}

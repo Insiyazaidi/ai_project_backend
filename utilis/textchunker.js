@@ -167,7 +167,7 @@ const normalizedscore = score/Math.sqrt(contentwords)
 const positionbonus = 1-(index/chunks.length)*0.1 // earlier chunks will give more priority .. index 
 // return clean obj 
 return {
-    content:chunk.content,
+    content:chunk.content,  // chunk.content ek property h jo use horhi h 
             chunkindex : chunk.chunkindex,
             pagenumber: chunk.pagenumber,
             _id:chunk._id,
