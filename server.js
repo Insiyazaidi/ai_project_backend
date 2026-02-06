@@ -8,6 +8,7 @@ import connectdb from "./config/db.js"
 import authroute from "./routes/authroutes.js";
 import documentroute from "./routes/documentroutes.js";
 import flashroute from "./routes/flashcardroutes.js"
+import airoute from "./routes/airoutes.js";
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const app = express();
@@ -35,7 +36,7 @@ app.use("/uploads" , express.static(path.join(__dirname , "uploads")))  // expre
 
 // ai_project/backend/uploads - will be public when we req on uploads url 
 
-
+app.use("/api/airoute" , airoute)
 
 
 // ROutes 
