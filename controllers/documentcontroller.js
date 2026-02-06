@@ -1,5 +1,5 @@
 import document from "../models/document.js";
-import flashcards from "../models/flashcard.js"
+import flashcard from "../models/flashcard.js"
 import quiz from "../models/quiz.js";
 import mongoose from "mongoose"
 import {extracttextrfrompdf} from "../utilis/pdfparser.js"
@@ -96,7 +96,7 @@ try {
     } ,
 {
     $lookup:{  // always return an array , array name is defined in as :" " , this will be automatically added to document temporary 
-        from:"flashcards",
+        from:"flashcards",  // collection name not a model name 
         localField:"_id",
         foreignField:"documentid",
         as:"flashcardsets"
@@ -104,7 +104,7 @@ try {
 },
 {
     $lookup:{
-        from:"quizzes",
+        from:"quizzes",  // collection name not a model name 
         localField:"_id", // documents collection m field hogi id krke 
         foreignField:"documentid",  // quizzes collection m field hogi document krke 
         as:"quizzes"
@@ -149,16 +149,44 @@ res.status(200).json({success:true,count:documents.length , data:documents})
 
 }
 
+
+
 // get single document with chunks 
 export const getdocument = async(req, res , next)=>{
     try {
+const particulardoc = await document.findOne({  // we could have used just document id to search but in case some othe ruser try to access doc of 
+    // someone else ...   
+    _id:req.params.id,  // URL wala id
+    userid:req.user._id // currently logged in user 
+})
 
-
-    
+if(!particulardoc){
+    return res.status(404).json({
+        success:false,
+        error:"document not found",
+        statuscode: 404
+    })
 }
+
+// get couunt of associated flashcards and quizzes ...  
+const flashcardcount = await flashcard.countDocuments({documentid:particulardoc._id , userid: req.user._id}) // countDocument is a method just like findOne 
+const quizcount = await quiz.countDocuments({documentid: particulardoc._id , userid:req.user._id})
+// update last accessed 
+particulardoc.lastaccessed = Date.now()
+await particulardoc.save()
+//combine document data with counts 
+const documentdata = particulardoc.toObject()  //  backend se Mongoose Document instance ata h we want to convert into plain js object 
+documentdata.flashcardcount = flashcardcount  //  Jab document fetch ho, tab uske kitne flashcards hain woh bhi mile bt hmne schema m toh 
+//  aise kuch define nhi kiya h .. isliye hm usko normaljs m convert kkre field add krrhe h temp 
+  documentdata.quizcount = quizcount
+  
+  res.status(200).json({
+    success:true , 
+    data: documentdata
+  })
+}
+
  catch (error) {
-   
-    
     next(error);
 }
 
@@ -168,30 +196,31 @@ export const getdocument = async(req, res , next)=>{
 
 export const deletedocument = async(req, res , next)=>{
  try {
-    
-
-
+   const deletingdoc  = await document.findOne({  
+    // someone else ...   
+    _id:req.params.id,  
+    userid:req.user._id 
+}) 
+if(!deletingdoc){
+    return res.status(404).json({
+        success:false,
+        error:"document not found",
+        statuscode: 404
+    })
 }
- catch (error) {
-   
-    
+// deleting file from filesystem 
+ await fs.unlink(deletingdoc.filepath).catch(()=>{})  // filepath jo db m store h vha se liya h 
+
+await deletingdoc.deleteOne()
+res.status(200).json({
+     success:true , 
+     message: "document deleted successfully"
+})
+}
+ catch (error) {   
     next(error);
 }
-    
-
 }
 
 
-export const updatedocument = async(req, res , next)=>{
-    try {
-    
-        
-}
- catch (error) {
-   
-    
-    next(error);
-}
 
-
-}

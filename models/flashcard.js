@@ -23,5 +23,5 @@ const flashcardschema = new mongoose.Schema({
 } , {timestamps:true})
 
 flashcardschema.index({userid:1 , documentid:1})
-const flashcards = mongoose.model("flashcards" , flashcardschema)
-export default flashcards
+const flashcard = mongoose.model("flashcard" , flashcardschema)
+export default flashcard
