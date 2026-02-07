@@ -69,27 +69,43 @@ catch(error){
     seperate questions with "---"
     Text:${text.substring(0, 15000)}`
 try{
-const response = ai.models.generateContent({
+const response =  await ai.models.generateContent({
      model:"gemini-2.5-flash-lite",
     contents: prompt
 })
 const generatedtext = response.text
 const questions=[]
-const questionblock = generatedtext.split("---").filter(q=>q.trim())
-for(const block of questionblock){
-    const lines = block.trim().split("\n")
-    let question=" ", option=[], correctanswer=" ", explanation = " ", difficulty="medium"
-    for(const line of lines){
-        const trimmed = line.trim()
+const questionblock = generatedtext.split("---").filter(q=>q.trim()) // this will split 1 block fully with option , ans & exp ... 2 ques .. 
+for(const block of questionblock){  // ab hr block ko iterate krreh h 
+    const lines = block.trim().split("\n") // ek block m ques , option , expl & diff ko split krreh h \n ke basis pr 
+    let question=" ", options=[], correctanswer=" ", explanation = " ", difficulty="medium"
+    for(const line of lines){  // ab hm line ko iterate krrhe h 
+        const trimmed = line.trim()  // ek baar usko trim krege uske baad check krege ki ques , ans ... 
         if(trimmed.startsWith("Q:")){
-            question = trimmed.substring(2).trim()
+            question = trimmed.substring(2).trim()  // Q: What is RAM --  (Q , :) 2 cheeeze htani h 
         }
-         else if(trimmed.startsWith("/^0\d:/")){
-            question = trimmed.substring(3).trim()
+         else if(trimmed.startsWith(/^0\d:/.test(trimmed))){   // startsWith() → normal string , test - regex 
+            options.push( trimmed.substring(3).trim())  // 01: Option  -- (0 ,1 , : ) 3 char chtane h 
+        }
+        // ^ - start of string , 0\d any no btw 0-9  , : semicloln aisa pattern follow hota h toh ok 
+         else if(trimmed.startsWith("C:")){
+            correctanswer = trimmed.substring(2).trim() // C: Brain  -- (C , :) 2 char htne 
+        }
+          else if(trimmed.startsWith("E:")){
+            explanation = trimmed.substring(2).trim()
+        }
+          else if(trimmed.startsWith("D:")){
+            const diff  = trimmed.substring(2).trim().toLowerCase()
+            if(["easy" , "medium" , "hard"].includes(diff)){
+                difficulty = diff
+            }
         }
     }
+    if(question && options.length===4 && correctanswer){
+        questions.push({question, options , correctanswer , explanation , difficulty})  // ek block ko questions array m daal dege 
+    }
 }
-
+return questions.slice(0, numques)  // ohr utne hi ques show krege jitne chahiye 
 }
 catch(error){
   console.log("Gemini API error", error)
