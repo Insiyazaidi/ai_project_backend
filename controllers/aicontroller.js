@@ -57,10 +57,37 @@ const generatedcards = await geminiservice.aiflashcards(fetchdoc.extractedtext ,
 
 export const generatequiz = async(req , res, next)=>{
     try{
+const {documentid , numques = 5 , title}=req.body
+if(!documentid){
+    return res.status(400).json({
+        success:false,
+        error:"Please provide documentid",
+        statuscode:400
+    })
+}
+const fetchdoc =  await document.findOne({_id:documentid , userid:req.user._id , status:"ready"})
+if(!fetchdoc){
+   return res.status(400).json({
+        success:false,
+        error:"Document not found or not ready",
+        statuscode:400
+    })  
+}
+const generatedquiz = await geminiservice.aiquiz(fetchdoc.extractedtext , parseInt(numques))
+const quizupdate = quiz.create({
+    userid:req.user._id,
+    documentid: fetchdoc._id ,
+    title: title || `${fetchdoc.title}-Quiz`,
+    questions: generatedquiz ,
+ totalquestion : generatedquiz.length , useranswer:[] , score:0
 
-
-
-
+})
+console.log(quizupdate)
+  res.status(201).json({
+        success:true , 
+        data: quizupdate ,
+        message: "Quiz generated successfully"
+    })  
     }
     catch(error){
         next(error)
