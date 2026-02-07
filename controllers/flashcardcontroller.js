@@ -6,7 +6,7 @@ import flashcard from "../models/flashcard.js";
     userid : req.user._id,  // coming from protect middleware who returns ans object nmes req.user containing info abt user 
     documentid: req.params.documentid  // coming from url 
   })
-.populate("documentid " , " title filename ").sort({createdAt:-1})  // flashcard schema dont have info abt document title or filename we need to make 
+.populate("documentid" , " title filename ").sort({createdAt:-1})  // flashcard schema dont have info abt document title or filename we need to make 
 // use of document schema toh add title and filename temp for response 
 res.status(200).json({
     success:true , 
@@ -81,7 +81,7 @@ if(cardindex=== -1){
 // ek user ke flashcard set m se ek card pick kro aur usko star ya unstar krdo 
  export  const togglestarflashcard = async(req,res,next)=>{
     try{
-const flashcardset = flashcard.findOne({
+const flashcardset = await flashcard.findOne({
     "cards._id": req.params.cardid,
     userid: req.user._id
 })
