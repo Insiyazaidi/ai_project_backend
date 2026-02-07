@@ -74,7 +74,7 @@ if(!fetchdoc){
     })  
 }
 const generatedquiz = await geminiservice.aiquiz(fetchdoc.extractedtext , parseInt(numques))
-const quizupdate = quiz.create({
+const quizupdate = await quiz.create({
     userid:req.user._id,
     documentid: fetchdoc._id ,
     title: title || `${fetchdoc.title}-Quiz`,
@@ -82,7 +82,7 @@ const quizupdate = quiz.create({
  totalquestion : generatedquiz.length , useranswer:[] , score:0
 
 })
-console.log(quizupdate)
+ // console.log(quizupdate)
   res.status(201).json({
         success:true , 
         data: quizupdate ,
