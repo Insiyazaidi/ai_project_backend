@@ -74,6 +74,7 @@ if(!fetchdoc){
     })  
 }
 const generatedquiz = await geminiservice.aiquiz(fetchdoc.extractedtext , parseInt(numques))
+console.log(generatedquiz)
 const quizupdate = await quiz.create({
     userid:req.user._id,
     documentid: fetchdoc._id ,
