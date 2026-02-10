@@ -166,9 +166,10 @@ ${text.substring(0, 15000)}
 
 
  export const aisummary = async(text)=>{
+    // console.log(text)
     const prompt = `Provide a concise summary of the following text  , highlighting the key concepts , main idea and important points keep the 
     summary clear and structure
-    text: ${text.substring(0 , 20000)}`
+    Text: ${text.substring(0 , 20000)}`
     try{
 const response = await ai.models.generateContent({
        model:"gemini-2.5-flash-lite",
@@ -183,6 +184,7 @@ return generatedtext
     throw new Error("Failed to generate flashcards")
     }
  }
+ 
  export const aichatWithcontext = async(question , chunks)=>{  // chunks is an object .. jiske ek property h content .. textchunker.js m dekho
 const context = chunks.map((c,i)=>`[chunk ${i+1}\n ${c.content}]`).join("\n\n") // structuring the data coming from chunks
 // chunk 1 content ... , chunk 2 content ... 

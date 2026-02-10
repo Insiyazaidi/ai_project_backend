@@ -124,8 +124,25 @@ export const generatesummary = async(req , res, next)=>{
     })
 }
         const fetchdoc = document.findOne({_id : documentid , userid: req.user._id , status:"ready" })
+
+           if (!fetchdoc) {
+            return res.status(400).json({
+                success: false,
+                error: "Document not found or not ready"
+            });
+        }
+        console.log(fetchdoc)
+        console.log(fetchdoc.extractedtext)
+
         const gotsummary = await geminiservice.aisummary(fetchdoc.extractedtext)
 
+        
+       res.status(200).json({
+        success:true ,
+        documentid: document._id,
+        title: document.title,
+        gotsummary
+       })
 
     }
     catch(error){
