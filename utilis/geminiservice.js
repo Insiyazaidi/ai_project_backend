@@ -57,66 +57,190 @@ catch(error){
 
  }
 
-export const aiquiz = async(text , numques = 5)=>{
-    
-    const prompt = `Generate exactly ${numques} multiple choice questions from text .format each question as :
-    Q:[Question]
-    01:[option 1]  02:[option 2]  03:[option 3]  04:[option 4] 
-    C :[Correct option - exactly as written above]
-    E:[Brief explanation]
-    D:[Difficulty:easy , medium or hard]
-    seperate questions with "---"
-    Text:${text.substring(0, 15000)}`
-try{
-const response =  await ai.models.generateContent({
-     model:"gemini-2.5-flash-lite",
-    contents: prompt
-})
-const generatedtext = response.text
-console.log(generatedtext)
-const questions=[]
-const questionblock = generatedtext.split("---").filter(q=>q.trim()) // this will split 1 block fully with option , ans & exp ... 2 ques .. 
-for(const block of questionblock){  // ab hr block ko iterate krreh h 
-    const formattedBlock = block.replace(/(0\d:)/g, "\n$1")
-    const lines = formattedBlock.trim().split("\n") // ek block m ques , option , expl & diff ko split krreh h \n ke basis pr 
-    let question=" ", options=[], correctanswer=" ", explanation = " ", difficulty="medium"
-    for(const line of lines){  // ab hm line ko iterate krrhe h 
-        const trimmed = line.trim()  // ek baar usko trim krege uske baad check krege ki ques , ans ... 
-        if(trimmed.startsWith("Q:")){
-            question = trimmed.substring(2).trim()  // Q: What is RAM --  (Q , :) 2 cheeeze htani h 
+
+
+// export const aiquiz = async (text, numques = 5) => {
+
+//     const prompt = `
+// Generate exactly ${numques} multiple choice questions from the text below.
+
+// STRICT RULES:
+// - Return ONLY valid JSON.
+// - Do NOT use markdown.
+// - Do NOT wrap in backticks.
+// - Do NOT write anything outside JSON.
+// - Each question must have exactly 4 UNIQUE options.
+// - "correctanswer" must EXACTLY match one of the options.
+// - Difficulty must be one of: easy, medium, hard.
+
+// Return in this format:
+
+// [
+//   {
+//     "question": "string",
+//     "options": ["string","string","string","string"],
+//     "correctAnswer": "string",
+//     "explanation": "string",
+//     "difficulty": "easy"
+//   }
+// ]
+
+// Text:
+// ${text.substring(0, 15000)}
+// `;
+
+//     try {
+
+//         const response = await ai.models.generateContent({
+//             model: "gemini-2.5-flash-lite",
+//             contents: prompt
+//         });
+
+//         let output = response.text?.trim();
+
+//         if (!output) {
+//             throw new Error("Empty response from Gemini");
+//         }
+
+//         // Remove markdown if Gemini adds it
+//         output = output
+//             .replace(/```json/g, "")
+//             .replace(/```/g, "")
+//             .trim();
+
+//         // Extract JSON safely
+//         const jsonMatch = output.match(/\[[\s\S]*\]/);
+
+//         if (!jsonMatch) {
+//             console.log("Invalid AI Output:", output);
+//             throw new Error("Invalid JSON returned from AI");
+//         }
+
+//         const questions = JSON.parse(jsonMatch[0]);
+
+//         // Final validation (extra safety)
+//         const cleanQuestions = questions
+//             .filter(q =>
+//                 q.question &&
+//                 Array.isArray(q.options) &&
+//                 q.options.length === 4 &&
+//                 q.options.includes(q.correctAnswer)
+//             )
+//             .slice(0, numques);
+
+//         return cleanQuestions;
+
+//     } catch (error) {
+//         console.log("Gemini API error:", error);
+//         throw new Error("Failed to generate Quiz");
+//     }
+// };
+
+
+export const aiquiz = async (text, numques = 5) => {
+
+    const prompt = `
+Generate exactly ${numques} multiple choice questions from text.
+
+Format each question exactly like this:
+
+Q:Question text
+01:Option 1
+02:Option 2
+03:Option 3
+04:Option 4
+C:Correct option text (exactly matching one option above)
+E:Brief explanation
+D:easy | medium | hard
+
+Separate questions with "---"
+
+Text:
+${text.substring(0, 15000)}
+`;
+
+    try {
+
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-lite",
+            contents: prompt
+        });
+
+        const generatedtext = response.text?.trim();
+
+        if (!generatedtext) {
+            throw new Error("Empty response from Gemini");
         }
-         else if(/^0\d:/.test(trimmed)){   // startsWith() → normal string , test - regex 
-            options.push( trimmed.substring(3).trim())  // 01: Option  -- (0 ,1 , : ) 3 char chtane h 
-        }
-        // ^ - start of string , 0\d any no btw 0-9  , : semicloln aisa pattern follow hota h toh ok 
-         else if(trimmed.startsWith("C:")){
-            correctanswer = trimmed.substring(2).trim() // C: Brain  -- (C , :) 2 char htne 
-        }
-          else if(trimmed.startsWith("E:")){
-            explanation = trimmed.substring(2).trim()
-        }
-          else if(trimmed.startsWith("D:")){
-            const diff  = trimmed.substring(2).trim().toLowerCase()
-            if(["easy" , "medium" , "hard"].includes(diff)){
-                difficulty = diff
+
+        const questions = [];
+
+        const questionBlocks = generatedtext.split("---").filter(q => q.trim());
+
+        for (const block of questionBlocks) {
+
+            const lines = block.trim().split("\n");
+
+            let question = "";
+            let options = [];
+            let correctAnswer = "";
+            let explanation = "";
+            let difficulty = "medium";
+
+            for (const line of lines) {
+
+                const trimmed = line.trim();
+
+                if (trimmed.startsWith("Q:")) {
+                    question = trimmed.substring(2).trim();
+                }
+
+                else if (/^0\d:/.test(trimmed)) {
+                    const optionText = trimmed.substring(3).trim();
+                    if (!options.includes(optionText)) {
+                        options.push(optionText);
+                    }
+                }
+
+                else if (trimmed.startsWith("C:")) {
+                    correctAnswer = trimmed.substring(2).trim();
+                }
+
+                else if (trimmed.startsWith("E:")) {
+                    explanation = trimmed.substring(2).trim();
+                }
+
+                else if (trimmed.startsWith("D:")) {
+                    const diff = trimmed.substring(2).trim().toLowerCase();
+                    if (["easy", "medium", "hard"].includes(diff)) {
+                        difficulty = diff;
+                    }
+                }
+            }
+
+            // Final validation for each block
+            if (
+                question &&
+                options.length === 4 &&
+                correctAnswer &&
+                options.includes(correctAnswer)
+            ) {
+                questions.push({
+                    question,
+                    options,
+                    correctAnswer,  
+                    explanation,
+                    difficulty
+                });
             }
         }
+
+        return questions.slice(0, numques);
+
+    } catch (error) {
+        console.log("Gemini API error", error);
+        throw new Error("Failed to generate Quiz");
     }
-    if(question && options.length===4 && correctanswer){
-        questions.push({question, options , correctanswer , explanation , difficulty})  // ek block ko questions array m daal dege 
-    }
-}
-return questions.slice(0, numques)  // ohr utne hi ques show krege jitne chahiye 
-}
-catch(error){
-  console.log("Gemini API error", error)
-    throw new Error("Failed to generate Quiz")
-}
- } 
-
-
-
-
+};
 
 
  export const aisummary = async(text)=>{
