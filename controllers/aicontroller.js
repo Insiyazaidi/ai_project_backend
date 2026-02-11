@@ -7,6 +7,7 @@ import * as geminiservice from "../utilis/geminiservice.js"
 //as geminiservice = un sab ko ek object ka naam de do
 import { findrelevantchunks } from "../utilis/textchunker.js";
 
+
 export const generateflashcards = async(req , res, next)=>{  // client se data lena , db m check krna vo doc present h ya nhi ,
    // geminiservice ko call krna flashcards bnane ke liye , db m store krna .. 
     try{
@@ -122,8 +123,8 @@ export const generatesummary = async(req , res, next)=>{
         error:"Please provide documentid",
         statuscode:400
     })
-}
-        const fetchdoc = document.findOne({_id : documentid , userid: req.user._id , status:"ready" })
+} 
+        const fetchdoc = await document.findOne({_id : documentid , userid: req.user._id , status:"ready" })
 
            if (!fetchdoc) {
             return res.status(400).json({
@@ -131,16 +132,16 @@ export const generatesummary = async(req , res, next)=>{
                 error: "Document not found or not ready"
             });
         }
-        console.log(fetchdoc)
-        console.log(fetchdoc.extractedtext)
+     //   console.log(fetchdoc)
+      //  console.log(fetchdoc.extractedtext)
 
         const gotsummary = await geminiservice.aisummary(fetchdoc.extractedtext)
 
         
        res.status(200).json({
         success:true ,
-        documentid: document._id,
-        title: document.title,
+        documentid: fetchdoc._id,
+        title: fetchdoc.title,
         gotsummary
        })
 
@@ -152,13 +153,63 @@ export const generatesummary = async(req , res, next)=>{
 export const chat = async(req , res, next)=>{
     try{
 
+    const {documentid , question} = req.body
+    if(!documentid || !question){
+         return res.status(400).json({
+        success:false,
+        error:"Please provide documentid and question",
+        statuscode:400 
+    })
     }
+    const fetchdoc = await document.findOne({
+        _id: documentid,
+        userid: req.user._id,
+        status:"ready"
+    })
+    if(!fetchdoc){
+        return res.status(400).json({
+                success: false,
+                error: "Document not found or not ready"
+            }); 
+    }
+
+    const relevantchunks = findrelevantchunks(fetchdoc.chunks , question , 3) // chunks aaige mostrelevant to less relevant
+    const chunkindices = relevantchunks.map(c=>c.chunkindices)  // chunkindices = [9 , 2, 7]
+    let fetchchathistory = await chathistory.findOne({
+        userid:req.user._id,
+        documentid: fetchdoc._id,
+    })
+    if(!fetchchathistory){
+        fetchchathistory=await chathistory.create({
+            userid: req.user._id,
+            documentid: fetchdoc._id,
+            messages:[]
+        })
+    }
+    // generate resonse usng gemini 
+    const answer = await geminiservice.aichatWithcontext(question , relevantchunks);
+    fetchchathistory.messages.push({
+        role:"user", content:question, timestamps: new Date() , relevantchunks:[]
+    } , { //  relevantchunks:[5 , 8 , 1 ]... 
+        role:"assistant" , content:answer, timestamps: new Date() , relevantchunks:chunkindices  // array of chunkindex used by gemini to genrate ans  
+    })
+    await fetchchathistory.save()
+    res.status(200).json({
+        success:true,
+        data:{
+            question, answer, relevantchunks:chunkindices, chathistoryid: fetchchathistory._id
+        },
+        message:"Response generated successfully"
+    })
+     
+}
     catch(error){
         next(error)
     }
 }
 export const explainconcept = async(req , res, next)=>{
     try{
+const {documentid , concept}= req.body
 
     }
     catch(error){

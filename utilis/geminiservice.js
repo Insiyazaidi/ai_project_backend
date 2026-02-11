@@ -188,6 +188,12 @@ return generatedtext
  export const aichatWithcontext = async(question , chunks)=>{  // chunks is an object .. jiske ek property h content .. textchunker.js m dekho
 const context = chunks.map((c,i)=>`[chunk ${i+1}\n ${c.content}]`).join("\n\n") // structuring the data coming from chunks
 // chunk 1 content ... , chunk 2 content ... 
+
+// i+1 isliye liya kyu ki vo counting m shi rhega 
+//indices + text ---  2 → MongoDB  ,  0 → Node ,  1 → Express
+// but hm context m shi se isko likh rhe h bs prompt numbering krke ..(1- mongoose indix-2 , 2- node index-0 ,3-express index -1 )
+
+
 const prompt = `Based on the following context from a document , Analyse the context and answer the user's question if the answer is 
 not in the context , say no 
 context:${context}
@@ -207,6 +213,7 @@ return generatedtext
     throw new Error("Failed to process chat request")
     }
  }
+ 
 
 export const aiexplainconcept = async(concept , context)=>{
 const prompt = `Explain the concept of ${concept} based on the following context .provide a clear educational explanation that easy to understand
