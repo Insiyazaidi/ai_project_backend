@@ -207,6 +207,8 @@ export const chat = async(req , res, next)=>{
         next(error)
     }
 }
+
+
 export const explainconcept = async(req , res, next)=>{
     try{
 const {documentid , concept}= req.body
