@@ -174,7 +174,7 @@ export const chat = async(req , res, next)=>{
     }
 
     const relevantchunks = findrelevantchunks(fetchdoc.chunks , question , 3) // chunks aaige mostrelevant to less relevant
-    const chunkindices = relevantchunks.map(c=>c.chunkindices)  // chunkindices = [9 , 2, 7]
+    const chunkindices = relevantchunks.map(c=>c.chunkindex)  // chunkindices = [9 , 2, 7]
     let fetchchathistory = await chathistory.findOne({
         userid:req.user._id,
         documentid: fetchdoc._id,
@@ -212,14 +212,69 @@ export const chat = async(req , res, next)=>{
 export const explainconcept = async(req , res, next)=>{
     try{
 const {documentid , concept}= req.body
+ if(!documentid || !concept){
+         return res.status(400).json({
+        success:false,
+        error:"Please provide documentid and concept",
+        statuscode:400 
+    })
+    }
+       const fetchdoc = await document.findOne({
+        _id: documentid,
+        userid: req.user._id,
+        status:"ready"
+    })
+    if(!fetchdoc){
+        return res.status(400).json({
+                success: false,
+                error: "Document not found or not ready"
+            }); 
+    }
+    const relevantchunks = findrelevantchunks(fetchdoc.chunks , concept , 3)
+    const context = relevantchunks.map(c=>c.content).join("\n\n")  //3 relevant chunks ke content ko join krdia 
+    // generate explanation using gemini 
+    const explanation = await geminiservice.aiexplainconcept(concept , context)
+    res.status(200).json({
+        success: true , 
+        data:{
+            concept , explanation , relevantchunks: relevantchunks.map(c=>c.chunkindex)
+        },
+        message:"Explanation generated successfully "
+    })
+
 
     }
     catch(error){
         next(error)
     }
 }
+
 export const getchathistory = async(req , res, next)=>{
     try{
+ const {documentid} = req.params
+ if(!documentid){
+return res.status(400).json({
+    success:false ,
+    error:"Please provide documentid",
+    statuscode: 400
+})
+ }
+ const fetchchathistory = await chathistory.findOne({
+    userid: req.user._id,
+    documentid: documentid
+ }).select("messages")  
+ if(!fetchchathistory){
+return res.status(200).json({
+    success: false ,
+    data:[],
+    message:"No chat history found for this document"
+})
+ }
+ res.status(200).json({
+    success:true , 
+    data: fetchchathistory.messages,
+    message: "Chat history retrieved successfully "
+ })
 
     }
     catch(error){
