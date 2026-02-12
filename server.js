@@ -9,6 +9,7 @@ import authroute from "./routes/authroutes.js";
 import documentroute from "./routes/documentroutes.js";
 import flashroute from "./routes/flashcardroutes.js"
 import airoute from "./routes/airoutes.js";
+import quizroute from "./routes/quizroutes.js";
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const app = express();
@@ -38,7 +39,7 @@ app.use("/uploads" , express.static(path.join(__dirname , "uploads")))  // expre
 
 app.use("/api/airoute" , airoute)
 
-
+app.use("/api/quiz" , quizroute)
 // ROutes 
 //404
 app.use((req,res)=>{
