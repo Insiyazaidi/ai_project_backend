@@ -30,8 +30,8 @@ if(!quizz){
     }) 
 }
   res.status(200).json({
-        success:false , 
-        data:quiz
+        success:true , 
+        data:quizz
     })
 
     }
@@ -50,18 +50,18 @@ if(!Array.isArray(answers)){
         statuscode: 400
     })
 }
-const quiz = await quiz.findOne({
+const fetchquiz = await quiz.findOne({
     _id : req.params.id,
     userid: req.user.id
 })
-if(!quiz){
+if(!fetchquiz){
   return  res.status(404).json({
         success: false ,
         error:"quiz not found",
         statuscode: 400
     })
 }
-if(quiz.completedat){ // default null h toh agr usmai kuch values h 
+if(fetchquiz.completedat){ // default null h toh agr usmai kuch values h 
   return  res.status(404).json({
         success: false ,
         error:"quiz already completed ",
@@ -71,11 +71,17 @@ if(quiz.completedat){ // default null h toh agr usmai kuch values h
 // process answer
 let correctcount = 0;
 const useranswers=[];
-answers.forEach(answer=>{
-    const {questionindex , selectedanswer} = answer;
-    if(questionindex<quiz.questions.length){
-        const question = quiz.questions[questionindex]
-        const iscorrect = selectedanswer===question.correctanswer
+answers.forEach(answer=>{// coming from frontend ,  answers ek array of objects h , jismai hr object ki property h questionindex, selected answer  
+  //  answers = [
+  // {
+ //    questionindex: Number,
+ //    selectedanswer: String
+ //  }
+// ]
+    const {questionindex , selectedanswer} = answer;  // hr iteration m hm yeh property extract krhe h 
+    if(questionindex<fetchquiz.questions.length){ // queestionindex jo userne bheja h vo chota hona chhaiye hmare db m joques savee h uski length se 
+        const question = fetchquiz.questions[questionindex]  // db m store ques ko fetch krrhe 
+        const iscorrect = selectedanswer===question.correctAnswer // db m stored ques ka answer match krre h selevted answerse 
         if(iscorrect){
     correctcount++;
         }
@@ -85,18 +91,18 @@ answers.forEach(answer=>{
     }
 })
 // calculate score 
-const score = Math.round((correctcount/quiz.totalquestions)*100)
-quiz.useranswers= useranswers;
-quiz.score = score 
-quiz.completedat = new Date()
-await quiz.save()
+const score = Math.round((correctcount/fetchquiz.totalquestion)*100)
+fetchquiz.useranswers= useranswers;
+fetchquiz.score = score 
+fetchquiz.completedat = new Date()
+await fetchquiz.save()
 res.status(200).json({
     success: true ,
     data:{
-        quizid: quiz._id ,
+        quizid: fetchquiz._id ,
         score ,
         correctcount,
-        totalquestions: quiz.totalquestions,
+        totalquestions: fetchquiz.totalquestion,
         percentage: score ,
         useranswers
     },

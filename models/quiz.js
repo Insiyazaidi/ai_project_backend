@@ -62,7 +62,7 @@ const quizschema = new mongoose.Schema({
         type:Number,
         default:0
     },
-    totalquestions:{
+    totalquestion:{
         type:Number,
         required:true
     },

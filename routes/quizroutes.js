@@ -5,8 +5,8 @@ const quizroute = express.Router()
 
 quizroute.use(protect)
 quizroute.get("/:documentid",getquizzes)
-quizroute.get("/quiz/:id",getquizbyid)
-quizroute.post("/:id/:submit",submitquiz)
+quizroute.get("/specificquiz/:id",getquizbyid)
+quizroute.post("/:id/submit",submitquiz)
 quizroute.get("/:id/results",getquizresults)
 quizroute.delete("/:id",deletequiz)
 export default quizroute
