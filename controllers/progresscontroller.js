@@ -20,7 +20,7 @@ try {
     })
     
     const quizzes = await quiz.find({userid , completedat:{$ne: null}})
-    const averagescore = quizzes.length>0?Math.round(quizzes.reduce((sum,q)=>sum+q.score,0)/ quizzes.length):0
+    const averagescore = quizzes.length>0?Math.round(quizzes.reduce((sum,q)=>sum+q.score,0)/ quizzes.length):0  // sum+q.score is adding up , 0 is for initalizaton of sum 
 const recentdocuments = await document.find({userid}).sort({lastaccessed:-1}).limit(5).select("title filename lastaccessed status")
 const recentquizzes = await quiz.find({userid}).sort({createdat:-1}).limit(5).populate("documentid" , "title").select("title score totalquestion completedat")
 const studystreak = Math.floor(Math.random()*7)+1
