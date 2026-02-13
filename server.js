@@ -10,6 +10,7 @@ import documentroute from "./routes/documentroutes.js";
 import flashroute from "./routes/flashcardroutes.js"
 import airoute from "./routes/airoutes.js";
 import quizroute from "./routes/quizroutes.js";
+import  progressroute from "./routes/progressroutes.js";
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const app = express();
@@ -40,6 +41,7 @@ app.use("/uploads" , express.static(path.join(__dirname , "uploads")))  // expre
 app.use("/api/airoute" , airoute)
 
 app.use("/api/quiz" , quizroute)
+app.use("/api/progress" , progressroute)
 // ROutes 
 //404
 app.use((req,res)=>{
