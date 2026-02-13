@@ -114,8 +114,52 @@ res.status(200).json({
         next(error)
     }
 }
-export const getquizresults = async(req, res, next)=>{
+
+ export const getquizresults = async(req, res, next)=>{
     try{
+        const fetchquiz = await quiz.findOne({
+            _id: req.params.id,
+            userid: req.user._id
+        }).populate("documentid", "title")
+        if(!fetchquiz){
+              return  res.status(404).json({
+        success: false ,
+        error:"quiz not found",
+        statuscode: 400
+    })
+        }
+        if(!fetchquiz.completedat){
+            return res.status(400).json({
+                success: false ,
+                error:"Quiz not completed yet",
+                statuscode: 400
+            })
+        }
+        const detailedresult = fetchquiz.questions.map((question, index)=>{  // index is just the position of the question in the array 
+            const useranswer = fetchquiz.useranswers.find(a=>a.questionindex===index)  // .find() is just matching question position with stored answer.
+            return {
+                questionindex:index,
+                question: question.question,
+                options: question.options,
+                correctAnswer: question.correctAnswer,
+                selectedanswer: useranswer?.selectedanswer || null,
+                iscorrect: useranswer?.iscorrect|| false,
+                explanation: question.explanation
+            }  
+        })
+
+          res.status(200).json({
+                success:true,
+                quiz:{
+                    id:fetchquiz._id,
+                    title:fetchquiz.title,
+                    document:fetchquiz.documentid,
+                    score: fetchquiz.score,
+                    totalquestion:fetchquiz.totalquestion,
+                    completedat : fetchquiz.completedat
+                },
+                results: detailedresult
+            })
 
     }
 
@@ -125,7 +169,23 @@ export const getquizresults = async(req, res, next)=>{
 }
 export const deletequiz = async(req, res, next)=>{
     try{
-
+ const fetchquiz = await quiz.findOne({
+    _id: req.params.id,
+    userid: req.user._id
+ })
+ if(!fetchquiz){
+     return res.status(400).json({
+                success: false ,
+                error:"Quiz not found",
+                statuscode: 400
+            })
+ }
+ await fetchquiz.deleteOne()
+ res.status(200).json({
+    success: false ,
+    message:"Quiz deleted successfully"
+ })
+ 
     }
 
     catch(error){
