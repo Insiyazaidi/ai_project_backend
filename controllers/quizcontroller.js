@@ -42,7 +42,7 @@ if(!quizz){
 }
 export const submitquiz = async(req, res, next)=>{
     try{
-const answers = req.body.answers;
+const answers = req.body.answers;  // MAY BE PROBLEM
 if(!Array.isArray(answers)){
     res.status(400).json({
         success: false ,

@@ -66,7 +66,7 @@ if(!ismatch){
 
 // generate token 
 const token = generatingtoken(checkinguser._id)
-res.status(200).json({success:true, loggedinuser:{id:checkinguser._id ,username:checkinguser.username , email:checkinguser.email, profileimage:checkinguser.profileimage } ,
+res.status(200).json({success:true, user:{id:checkinguser._id ,username:checkinguser.username , email:checkinguser.email, profileimage:checkinguser.profileimage } ,
 token , message:"Login sucessfull"})
     }
     catch(error){
