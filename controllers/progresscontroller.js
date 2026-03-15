@@ -13,7 +13,7 @@ try {
     let totalflashcards =0;
     let reviewedflashcards=0;
     let starredflashcards=0;
-    flashcardsets.forEach(set=>{
+    flashcardsets.forEach(set=>{  // counting total  o of flashcards , reviewed , starred 
         totalflashcards+=set.cards.length
         reviewedflashcards+=set.cards.filter(c=>c.reviewcount>0).length
         starredflashcards+= set.cards.filter(c=>c.isstarred).length
