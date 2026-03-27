@@ -42,9 +42,10 @@ if(!quizz){
 }
 export const submitquiz = async(req, res, next)=>{
     try{
+        console.log(req.body)
 const answers = req.body.answers;  // MAY BE PROBLEM
 if(!Array.isArray(answers)){
-    res.status(400).json({
+  return  res.status(400).json({
         success: false ,
         error:"Please provide answer array",
         statuscode: 400
@@ -114,7 +115,6 @@ res.status(200).json({
         next(error)
     }
 }
-
  export const getquizresults = async(req, res, next)=>{
     try{
         const fetchquiz = await quiz.findOne({
