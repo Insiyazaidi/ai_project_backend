@@ -43,7 +43,7 @@ if(!quizz){
 export const submitquiz = async(req, res, next)=>{
     try{
         console.log(req.body)
-const answers = req.body.answers;  // MAY BE PROBLEM
+const answers = req.body.answers;  
 if(!Array.isArray(answers)){
   return  res.status(400).json({
         success: false ,
@@ -72,6 +72,8 @@ if(fetchquiz.completedat){ // default null h toh agr usmai kuch values h
 // process answer
 let correctcount = 0;
 const useranswers=[];
+
+
 answers.forEach(answer=>{// coming from frontend ,  answers ek array of objects h , jismai hr object ki property h questionindex, selected answer  
   //  answers = [
   // {
@@ -91,6 +93,9 @@ answers.forEach(answer=>{// coming from frontend ,  answers ek array of objects 
         })
     }
 })
+
+
+
 // calculate score 
 const score = Math.round((correctcount/fetchquiz.totalquestion)*100)
 fetchquiz.useranswers= useranswers;
