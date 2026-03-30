@@ -22,5 +22,5 @@ const loginvalidation = [
 
  authroute.get("/profile" , protect , getprofile)
  authroute.put("/profile" , protect, updateprofile)
- authroute.post("/change-password" , protect , changepassword)  
+ authroute.put("/change-password" , protect , changepassword)  
  export default authroute
