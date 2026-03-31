@@ -1,6 +1,5 @@
 import mongoose from "mongoose"
 import bcrypt from "bcryptjs"
-import { defaultAllowedOrigins } from "vite";
 const userschema = new mongoose.Schema({
    username:{
     type:String ,
