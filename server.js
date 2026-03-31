@@ -27,6 +27,10 @@ app.use(
         }
     )
 )
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "ALLOWALL");
+  next();
+});
 
 app.use(express.json());  // to make use of json in future 
  app.use("/api/user" , authroute);
