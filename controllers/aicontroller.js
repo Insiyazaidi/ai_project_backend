@@ -193,7 +193,9 @@ export const chat = async(req , res, next)=>{
     } , { //  relevantchunks:[5 , 8 , 1 ]... 
         role:"assistant" , content:answer, timestamps: new Date() , relevantchunks:chunkindices  // array of chunkindex used by gemini to genrate ans  
     })
+    fetchchathistory.markModified("messages")
     await fetchchathistory.save()
+
     res.status(200).json({
         success:true,
         data:{
