@@ -54,12 +54,12 @@ res.status(201).json({
 
 
 } 
-catch (error) {
+catch (err) {
     // clean up file on error 
     if(req.file){
         await fs.unlink(req.file.path).catch(()=>{})  // remove file from server// .catch is used if deleting file will give error then catch if and ignore 
     }
-    next(error);  // pass an error to Express's error-handling middleware
+    next(err);  // pass an error to Express's error-handling middleware
 }
 
 }
