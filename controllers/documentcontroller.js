@@ -29,7 +29,7 @@ return res.status(400).json({
 }
 
 // construct the base url for the uploaded file
-const baseurl = `http://localhost:${process.env.PORT|| 8000}`
+const baseurl = "https://synaply.onrender.com"
 const fileurl = `${baseurl}/uploads/documents/${req.file.filename}`
 console.log(fileurl)
 
