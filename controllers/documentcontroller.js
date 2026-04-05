@@ -9,7 +9,7 @@ import fs from "fs/promises"
 
 export const uploaddocument = async(req , res , next)=>{
 try {
-    
+ console.log(req)   
 if(!req.file){  // multer se object nhi aaya req.file , req.file is the name of object coming from  multer .... 
     return res.status(400).json({
         success:false,
