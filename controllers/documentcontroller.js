@@ -29,9 +29,9 @@ return res.status(400).json({
 }
 
 // construct the base url for the uploaded file
-const baseurl = "https://synaply.onrender.com"
+const baseurl = "https://synaply-backend.onrender.com"
 const fileurl = `${baseurl}/uploads/documents/${req.file.filename}`
-console.log(fileurl)
+console.log(fileurl)  // yeh url db m save horha hhh 
 
 // create document record
 const documents = await document.create({   // storing in database 
