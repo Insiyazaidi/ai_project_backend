@@ -29,7 +29,7 @@ return res.status(400).json({
 }
 
 // construct the base url for the uploaded file
-const baseurl = "https://synaply-backend.onrender.com"
+const baseurl = "https://synaply.onrender.com"
 const fileurl = `${baseurl}/uploads/documents/${req.file.filename}`
 console.log(fileurl)
 
