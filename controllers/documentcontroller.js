@@ -37,11 +37,12 @@ console.log(fileurl)  // yeh url db m save horha hhh
 const documents = await document.create({   // storing in database 
     userid:req.user._id, // req.user is an object coming from protect middleware 
     title,
-    filename: req.file.filename,
+    filename: req.file.filename, 
     filesize:req.file.size,
     filepath :fileurl,
     status:"processing"
 })
+console.log(documents)
 processpdf(documents._id , req.file.path).catch(err=>{
     console.log("pdf  processing error", err)
 })  
